@@ -3,13 +3,29 @@
 
 
 $hintFinal = <<SCRIPT
-    echo "##########################################################################"
-    echo "# check http://localhost:9090 for tomcat                                 #"
-    echo "# connect to mongo on localhost:27017                                    #"
-    echo "# connect to rabbit on localhost:15672                                   #"
-    echo "# vagrant ssh (on real operation systems)                                #"
-    echo "# with putty at localhost user: vagrant, passwd: vagrant, port:2222 (win)#"
-    echo "##########################################################################"    
+    echo "###############################################################################"
+    echo "# check http://localhost:9090 for tomcat                                      #"
+    echo "# connect to mongo on localhost:27017                                         #"
+    echo "# connect to rabbit on localhost:15672 (user:pal, password:palpass)           #"
+    echo "# vagrant ssh (on real operation systems)                                     #"
+    echo "# with putty at localhost user: vagrant, passwd: vagrant, port:2222 (win)     #"
+    echo "#                                                                             #"
+    echo "# for mysql you have to do something:                                         #"
+    echo "# vagrant ssh                                                                 #"
+    echo "# sudo apt-get install mysql-server                                           #"
+    echo "# sudo mysql_secure_installation (default password is root)                   #"
+    echo "# sudo mysql_install_db                                                       #"
+    echo "# mysql --version                                                             #"
+    echo "# sudo sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf                       #"
+    echo "# sudo service mysql restart                                                  #"
+    echo "# mysql -h localhost -u root -proot                                           #"
+    echo "# CREATE USER 'springboot'@'localhost' IDENTIFIED BY 'workshop';              #"
+    echo "# GRANT ALL PRIVILEGES ON *.* TO 'springboot'@'localhost' WITH GRANT OPTION;  #"
+    echo "# CREATE USER 'springboot'@'%' IDENTIFIED BY 'workshop';                      #"
+    echo "# GRANT ALL PRIVILEGES ON *.* TO 'springboot'@'%' WITH GRANT OPTION;          #"
+    echo "# FLUSH PRIVILEGES;                                                           #"
+    echo "# CREATE DATABASE testdb;                                                     #"
+    echo "###############################################################################"    
 SCRIPT
 
 $hintMongo = <<SCRIPT
@@ -111,17 +127,10 @@ Vagrant.configure("2") do |config|
      #sudo mysql_install_db
      #mysql --version
      #sudo sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
-     #service mysql restart
+     #sudo service mysql restart
 
      # manual
      #mysql -h localhost -u root -proot
-     #mysql> CREATE USER 'pal'@'localhost' IDENTIFIED BY 'pal';
-     #mysql> GRANT ALL PRIVILEGES ON *.* TO 'pal'@'localhost' WITH GRANT OPTION;
-     #mysql> CREATE USER 'pal'@'%' IDENTIFIED BY 'pal';
-     #mysql> GRANT ALL PRIVILEGES ON *.* TO 'pal'@'%' WITH GRANT OPTION;
-     #mysql> FLUSH PRIVILEGES;
-     #mysql> CREATE DATABASE pal;
-
      #mysql> CREATE USER 'springboot'@'localhost' IDENTIFIED BY 'workshop';
      #mysql> GRANT ALL PRIVILEGES ON *.* TO 'springboot'@'localhost' WITH GRANT OPTION;
      #mysql> CREATE USER 'springboot'@'%' IDENTIFIED BY 'workshop';
