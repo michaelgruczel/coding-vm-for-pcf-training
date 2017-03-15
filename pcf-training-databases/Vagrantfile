@@ -1,0 +1,138 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+$hintFinal = <<SCRIPT
+    echo "##########################################################################"
+    echo "# check http://localhost:9090 for tomcat                                 #"
+    echo "# connect to mongo on localhost:27017                                    #"
+    echo "# connect to rabbit on localhost:15672                                   #"
+    echo "# vagrant ssh (on real operation systems)                                #"
+    echo "# with putty at localhost user: vagrant, passwd: vagrant, port:2222 (win)#"
+    echo "##########################################################################"    
+SCRIPT
+
+$hintMongo = <<SCRIPT
+    echo "##########################################################################"
+    echo "# install mongo db                                                       #"
+    echo "##########################################################################"    
+SCRIPT
+
+$hintTomcat = <<SCRIPT
+    echo "##########################################################################"
+    echo "# install tomcat                                                         #"
+    echo "##########################################################################"    
+SCRIPT
+
+$hintRabbit = <<SCRIPT
+    echo "##########################################################################"
+    echo "# install rabbit mq                                                      #"
+    echo "##########################################################################"    
+SCRIPT
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "ubuntu/trusty64"
+  # config.vm.box_check_update = false
+
+  config.vm.network "forwarded_port", guest: 8080, host: 9090
+  config.vm.network "forwarded_port", guest: 5672, host: 5672
+  config.vm.network "forwarded_port", guest: 27017, host: 27017
+  config.vm.network "forwarded_port", guest: 3306, host: 3306
+  config.vm.network "forwarded_port", guest: 15672, host: 15672
+
+  # config.vm.network "private_network", ip: "192.168.33.10"
+  # config.vm.network "public_network"
+  config.vm.synced_folder "./shared-folder", "/shared-folder"
+
+  #
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = "1024"
+  # end
+
+  # config.push.define "atlas" do |push|
+  #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
+  # end
+
+  config.vm.provision "shell", inline: $hintTomcat
+
+  config.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y default-jdk
+     mkdir /home/vagrant/tomcat
+     cd /home/vagrant/tomcat
+     wget http://apache.osuosl.org/tomcat/tomcat-8/v8.5.11/bin/apache-tomcat-8.5.11.tar.gz
+     sudo tar xvf apache-tomcat-8*tar.gz -C /home/vagrant/tomcat --strip-components=1
+     sudo chown vagrant /home/vagrant/tomcat -R
+     cd /home/vagrant/tomcat/bin
+     ./catalina.sh start
+  SHELL
+
+  config.vm.provision "shell", inline: $hintMongo
+
+  config.vm.provision "shell", inline: <<-SHELL
+     sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+     echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+     sudo apt-get update
+     sudo apt-get install -y mongodb-org
+     sudo service mongod restart
+     sudo sed -i 's/bindIp: 127.0.0.1/bindIp: 0.0.0.0/g' /etc/mongod.conf
+     sudo service mongod restart
+     #vim /etc/mongod.conf -> add bind_ip=0.0.0.0
+     #iptables -A INPUT -p tcp --dport 27017 -j ACCEPT
+  SHELL
+
+  config.vm.provision "shell", inline: $hintRabbit
+
+  config.vm.provision "shell", inline: <<-SHELL
+     echo 'deb http://www.rabbitmq.com/debian/ testing main' | sudo tee /etc/apt/sources.list.d/rabbitmq.list
+     wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | sudo apt-key add -
+     sudo apt-get update
+     sudo apt-get install -y rabbitmq-server
+     sudo rabbitmq-plugins enable rabbitmq_management
+     sudo rabbitmqctl add_user pal palpass
+     sudo rabbitmqctl set_permissions -p / pal ".*" ".*" ".*"
+     sudo rabbitmqctl set_user_tags pal administrator
+     sudo apt-get install -y maven
+     mvn -version       
+  SHELL
+
+  config.vm.provision "shell", inline: <<-SHELL
+     echo "mysql-server-5.6 mysql-server/root_password password root" | sudo debconf-set-selections
+     echo "mysql-server-5.6 mysql-server/root_password_again password root" | sudo debconf-set-selections
+     
+     # manual
+     #sudo apt-get install mysql-server
+     #sudo mysql_secure_installation
+     #sudo mysql_install_db
+     #mysql --version
+     #sudo sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
+     #service mysql restart
+
+     # manual
+     #mysql -h localhost -u root -proot
+     #mysql> CREATE USER 'pal'@'localhost' IDENTIFIED BY 'pal';
+     #mysql> GRANT ALL PRIVILEGES ON *.* TO 'pal'@'localhost' WITH GRANT OPTION;
+     #mysql> CREATE USER 'pal'@'%' IDENTIFIED BY 'pal';
+     #mysql> GRANT ALL PRIVILEGES ON *.* TO 'pal'@'%' WITH GRANT OPTION;
+     #mysql> FLUSH PRIVILEGES;
+     #mysql> CREATE DATABASE pal;
+
+     #mysql> CREATE USER 'springboot'@'localhost' IDENTIFIED BY 'workshop';
+     #mysql> GRANT ALL PRIVILEGES ON *.* TO 'springboot'@'localhost' WITH GRANT OPTION;
+     #mysql> CREATE USER 'springboot'@'%' IDENTIFIED BY 'workshop';
+     #mysql> GRANT ALL PRIVILEGES ON *.* TO 'springboot'@'%' WITH GRANT OPTION;
+     #mysql> FLUSH PRIVILEGES;
+     #mysql> CREATE DATABASE testdb;
+     
+       
+  SHELL
+
+  config.vm.provision "shell", inline: $hintFinal
+
+
+end
