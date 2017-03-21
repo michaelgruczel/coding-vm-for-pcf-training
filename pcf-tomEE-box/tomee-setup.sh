@@ -24,6 +24,8 @@ sudo apt-get -y install maven
 cd ..
 cd ..
 git clone https://github.com/platform-acceleration-lab/apps-movie-fun-code.git
-cd  apps-movie-fun-code
+sudo chown -R vagrant  apps-movie-fun-code
+cd  apps-movie-fun-code/
+cp /mnt/bootstrap/pom.xml /home/vagrant/apps-movie-fun-code/pom.xml
 mvn clean package -DskipTests -Dmaven.test.skip=true
-cp target/apps-movie-fun-code.war /home/vagrant/apache-tomee-webprofile-1.7.4/webapps
+cp target/moviefun.war /home/vagrant/apache-tomee-webprofile-1.7.4/webapps
