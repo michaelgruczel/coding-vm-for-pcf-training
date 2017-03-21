@@ -14,8 +14,16 @@ sudo apt-get install -y openjdk-7-jre
 #    </interface>
 #
 #you can simply package your application as a standard WAR file and copy it to the [TomEE]/webapps folder, or as an EAR file and copy it to the [TomEE]/apps folder.
-sudo wget https://jdbc.postgresql.org/download/postgresql-9.4.1212.jre6.jar
 sudo chown -R vagrant:vagrant apache-tomee-webprofile-1.7.4/
 cd apache-tomee-webprofile-1.7.4/bin
 nohup ./startup.sh &
-
+sudo apt-get update
+sudo apt-get -y install git
+sudo apt-get -y install default-jdk
+sudo apt-get -y install maven
+cd ..
+cd ..
+git clone https://github.com/platform-acceleration-lab/apps-movie-fun-code.git
+cd  apps-movie-fun-code
+mvn clean package -DskipTests -Dmaven.test.skip=true
+cp target/apps-movie-fun-code.war /home/vagrant/apache-tomee-webprofile-1.7.4/webapps
