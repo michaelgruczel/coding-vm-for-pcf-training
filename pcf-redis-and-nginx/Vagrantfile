@@ -1,20 +1,29 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$script = <<SCRIPT
+$script1 = <<SCRIPT
 echo I am provisioning...
 date > /etc/vagrant_provisioned_at
 SCRIPT
 
+$script2 = <<SCRIPT
+echo ..provisiong done, copy you jar/war files to the vagrant folder and you will find them inside the vm at /mnt/bootstrap
+date > /etc/vagrant_provisioned_at
+SCRIPT
+
+
 Vagrant.configure("2") do |config|
-  config.vm.provision "shell", inline: $script
+  config.vm.provision "shell", inline: $script1
 end
 
 Vagrant::Config.run do |config|
   config.vm.box = "ubuntu/trusty64"
   config.vm.box_url = "https://atlas.hashicorp.com/ubuntu/boxes/trusty64"
   config.vm.share_folder "bootstrap", "/mnt/bootstrap", ".", :create => true
-  config.vm.provision :shell, :path => "tomee-setup.sh"
+  config.vm.provision :shell, :path => "redis-setup.sh"
   config.vm.forward_port 9000, 9000
+end
 
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", inline: $script2
 end
