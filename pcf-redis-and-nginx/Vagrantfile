@@ -22,8 +22,10 @@ Vagrant::Config.run do |config|
   config.vm.share_folder "bootstrap", "/mnt/bootstrap", ".", :create => true
   config.vm.provision :shell, :path => "redis-setup.sh"
   config.vm.forward_port 9000, 9000
+  config.vm.customize ["modifyvm", :id, "--memory", 2048]
 end
 
 Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: $script2
 end
+
